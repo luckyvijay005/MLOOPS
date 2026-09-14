@@ -1,0 +1,102 @@
+%% ============================================================================
+%% Hospital Readmission Analytics & Prediction - System Architecture Diagram
+%% ============================================================================
+
+flowchart TD
+    %% Styling classes
+    classDef external fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef raw fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    classDef staging fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef validation fill:#ffebee,stroke:#d32f2f,stroke-width:2px;
+    classDef curated fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+    classDef analytics fill:#e0f2f1,stroke:#00796b,stroke-width:2px;
+    classDef dashboard fill:#ede7f6,stroke:#512da8,stroke-width:2px;
+    classDef futureML fill:#fafafa,stroke:#9e9e9e,stroke-width:2px,stroke-dasharray: 5 5;
+
+    subgraph Data_Source["External Public Repository"]
+        UCI["Public UCI Dataset<br/>(Diabetes 130-US Hospitals 1999-2008)"]:::external
+    end
+
+    subgraph Landing_Zone["Local Secure Landing Zone"]
+        DL["download_dataset.py<br/>(Checksum & Ingestion Audit)"]:::raw
+        RAW["Raw Data Layer<br/>data/raw/diabetic_data.csv"]:::raw
+        META["metadata.etl_ingestion_log<br/>(SHA-256, Timestamps, Row Counts)"]:::raw
+    end
+
+    subgraph Orchestration["Apache Airflow / Standalone CLI Orchestrator"]
+        DAG["Airflow DAG: hospital_readmission_etl<br/>(12 Idempotent Tasks & Dependencies)"]:::staging
+    end
+
+    subgraph Staging_Zone["Staging Layer"]
+        STG["staging.diabetic_encounters<br/>(Preserves Exact Raw Columns)"]:::staging
+    end
+
+    subgraph Quality_Gate["Data Quality & Validation Framework"]
+        DQ["validate_data.py<br/>Schema, Null, Bound, & Duplicate Checks"]:::validation
+        REJ["rejected.encounters<br/>data/rejected/ (Isolated Error Logs)"]:::validation
+        CLEAN["clean_data.py & standardization.py<br/>('?' to NULL, ICD-9 Categories, Readmission Flags)"]:::staging
+    end
+
+    subgraph Curated_Zone["Curated Relational Layer (PostgreSQL / Privacy Shield)"]
+        PRIVACY["Privacy Shield<br/>SHA-256(patient_nbr + salt)"]:::curated
+        ENC["curated.encounters"]:::curated
+        DIAG["curated.diagnoses"]:::curated
+        ADM["curated.admissions"]:::curated
+        READM["curated.readmissions"]:::curated
+    end
+
+    subgraph Analytics_Zone["Analytical Data Marts (PostgreSQL)"]
+        MART_PAT["analytics.patient_summary<br/>(1 Row per Patient Key)"]:::analytics
+        MART_READM["analytics.readmission_summary<br/>(Age, Gender, Race, Admission Type)"]:::analytics
+        MART_ADM["analytics.admission_summary<br/>(Type, Source, Disposition)"]:::analytics
+        MART_DIAG["analytics.diagnosis_summary<br/>(ICD-9 Clinical Category)"]:::analytics
+        MART_LOS["analytics.length_of_stay_summary<br/>(Days in Hospital vs Readmission)"]:::analytics
+    end
+
+    subgraph UI_Layer["Presentation Layer"]
+        DASH["Streamlit Dashboard<br/>(Plotly Visualizations & Cohort Analysis)"]:::dashboard
+    end
+
+    %% Part 1 Flows
+    UCI --> DL
+    DL --> RAW
+    DL --> META
+    RAW --> DAG
+    DAG --> STG
+    STG --> DQ
+    DQ -->|Quality Check Failed| REJ
+    DQ -->|Passed Checks| CLEAN
+    CLEAN --> PRIVACY
+    PRIVACY --> ENC
+    PRIVACY --> DIAG
+    PRIVACY --> ADM
+    PRIVACY --> READM
+
+    ENC & DIAG & ADM & READM --> MART_PAT
+    ENC --> MART_READM
+    ADM --> MART_ADM
+    DIAG --> MART_DIAG
+    ENC --> MART_LOS
+
+    MART_PAT & MART_READM & MART_ADM & MART_DIAG & MART_LOS --> DASH
+
+    %% ========================================================================
+    %% Future Part 2 MLOps Extension
+    %% ========================================================================
+    subgraph Part_2_MLOps["Future Part 2: MLOps & Readmission Prediction Pipeline (Planned Boundary)"]
+        FS["Feature Store / Training Dataset<br/>(curated.encounters + analytics)"]:::futureML
+        TRAIN["Model Training<br/>(Logistic Regression, Random Forest, XGBoost)"]:::futureML
+        TRACK["Experiment Tracking<br/>(MLflow / Parameters, Metrics, Artifacts)"]:::futureML
+        VAL["Model Validation & Bias Audit<br/>(Fairness & Sub-Cohort Performance)"]:::futureML
+        REG["Model Registry<br/>(Versioned Model Staging & Production)"]:::futureML
+        API["FastAPI / Inference Endpoint<br/>(Real-Time Readmission Scoring)"]:::futureML
+        ML_UI["Streamlit Risk Prediction UI<br/>(Future Interactive Patient Risk Scoring)"]:::futureML
+    end
+
+    MART_PAT -.->|Training Extract| FS
+    FS -.-> TRAIN
+    TRAIN -.-> TRACK
+    TRACK -.-> VAL
+    VAL -.-> REG
+    REG -.-> API
+    API -.-> ML_UI

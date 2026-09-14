@@ -1,0 +1,25 @@
+# Core Data Engineering & Analysis
+pandas>=2.1.0
+numpy>=1.26.0
+pyarrow>=14.0.0
+scipy>=1.11.0
+
+# Database & Storage
+sqlalchemy>=2.0.25
+psycopg2-binary>=2.9.9
+
+# Validation & Utilities
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Interactive Dashboard & Visualization
+streamlit>=1.31.0
+plotly>=5.18.0
+
+# Testing & Quality
+pytest>=7.4.0
+pytest-mock>=3.12.0
+
+# Presentation & Reporting
+python-pptx>=1.0.0

@@ -1,0 +1,22 @@
+{
+  "pipeline_run_id": "RUN_20260911_171134",
+  "start_time": "2026-09-11T17:11:34.085747+00:00",
+  "end_time": "2026-09-11T17:11:42.496520+00:00",
+  "input_dataset_path": "data\\sample\\synthetic_diabetic_data.csv",
+  "input_rows": 500,
+  "staged_rows": 500,
+  "cleaned_rows": 500,
+  "rejected_rows": 0,
+  "curated_encounters": 500,
+  "curated_diagnoses": 1447,
+  "curated_admissions": 500,
+  "curated_readmissions": 500,
+  "unique_patients": 223,
+  "duplicate_records_found": 0,
+  "null_or_bound_violations": 0,
+  "rejection_breakdown": {},
+  "database_connected": false,
+  "status": "SUCCESS",
+  "error_message": null,
+  "duration_seconds": 8.41
+}

@@ -1,0 +1,2 @@
+source_name,source_file,extraction_timestamp,file_checksum,row_count,column_count,status,error_message,pipeline_run_id
+UCI Diabetes 130-US Hospitals (1999-2008),diabetic_data.csv,2026-09-11T17:11:07.451814+00:00,0689e7ec031237dc63031b938805c48377748761a3b26acab621567afa24df97,101766,50,SUCCESS,,RUN_20260911_171107

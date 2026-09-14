@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hospital_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-hospital_analytics}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/01_create_schemas.sql:/docker-entrypoint-initdb.d/01_create_schemas.sql:ro
+      - ./sql/02_create_tables.sql:/docker-entrypoint-initdb.d/02_create_tables.sql:ro
+      - ./sql/03_create_indexes.sql:/docker-entrypoint-initdb.d/03_create_indexes.sql:ro
+      - ./sql/04_create_views.sql:/docker-entrypoint-initdb.d/04_create_views.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-hospital_analytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: hospital_dashboard
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-hospital_analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PROJECT_PATIENT_SALT: ${PROJECT_PATIENT_SALT:-h0sp1t4l_r3adm1ss10n_s4lt_2024_v1}
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

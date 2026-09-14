@@ -1,0 +1,22 @@
+{
+  "pipeline_run_id": "RUN_20260911_171107",
+  "start_time": "2026-09-11T17:11:07.398187+00:00",
+  "end_time": "2026-09-11T17:11:27.422800+00:00",
+  "input_dataset_path": "C:\\Users\\User\\Desktop\\ML OPS\\data\\raw\\diabetic_data.csv",
+  "input_rows": 101766,
+  "staged_rows": 101766,
+  "cleaned_rows": 101766,
+  "rejected_rows": 0,
+  "curated_encounters": 101766,
+  "curated_diagnoses": 303496,
+  "curated_admissions": 101766,
+  "curated_readmissions": 101766,
+  "unique_patients": 71518,
+  "duplicate_records_found": 0,
+  "null_or_bound_violations": 0,
+  "rejection_breakdown": {},
+  "database_connected": false,
+  "status": "SUCCESS",
+  "error_message": null,
+  "duration_seconds": 20.02
+}
