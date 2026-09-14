@@ -155,6 +155,8 @@ class FeatureEngineer:
         ]
         available_enc_cols = [c for c in enc_cols if c in df_feat.columns]
         df_encounters = df_feat[available_enc_cols].copy()
+        if "gender" in df_encounters.columns:
+            df_encounters["gender"] = df_encounters["gender"].fillna("Unknown")
         df_encounters["pipeline_run_id"] = self.run_id
 
         # 2. Curated Diagnoses (Unpivoted diag_1, diag_2, diag_3)

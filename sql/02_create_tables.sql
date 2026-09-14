@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS curated.encounters (
     patient_key VARCHAR(64) NOT NULL,
     encounter_id_surrogate VARCHAR(64) NOT NULL,
     age_group VARCHAR(20) NOT NULL,
-    gender VARCHAR(20) NOT NULL,
+    gender VARCHAR(20),
     race VARCHAR(50),
     admission_type VARCHAR(100) NOT NULL,
     discharge_disposition VARCHAR(100) NOT NULL,
